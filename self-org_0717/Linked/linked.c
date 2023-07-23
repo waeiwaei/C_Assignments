@@ -17,10 +17,7 @@ char* strdup(const char* str) {
     }
 
     size_t len = strlen(str);
-    char* new_str = (char*)malloc(len + 1); // +1 for null-terminator
-    if (new_str == NULL) {
-        return NULL; // Memory allocation failed
-    }
+    char* new_str = (char*)ncalloc(len + 1, sizeof(char)); // +1 for null-terminator
 
     strcpy(new_str, str);
     return new_str;
@@ -35,10 +32,6 @@ Create an empty soll. Can be of type:
 
 soll* soll_init(orgtype type) {
     soll* s = (soll*)ncalloc(1, sizeof(soll));
-    if (s == NULL) {
-        fprintf(stderr, "Memory allocation failed for soll.\n");
-        return NULL;
-    }
 
     s->head = NULL;
     s->tail = NULL;
@@ -49,8 +42,26 @@ soll* soll_init(orgtype type) {
 }
 
 
+
+// Helper function to check if the input is a valid C-style string
+bool is_valid_c_string(char* str) {
+    if (str == NULL) {
+        return false;
+    }
+
+    // Check if the string is null-terminated
+    for (size_t i = 0; str[i] != '\0'; i++) {
+        // Optionally, you can perform additional checks here
+        // to ensure that str contains valid characters.
+        // For example, you can check if the characters are within a certain range.
+    }
+
+    return true;
+}
+
+
 void soll_add(soll* s, char* str) {
-    if (s == NULL) {
+    if (s == NULL || str == NULL || strlen(str) == 0) {
         return;
     }
 
@@ -59,9 +70,6 @@ void soll_add(soll* s, char* str) {
     newNode->data = strdup(str); // Deep copy the string
     newNode->count = 1;
     newNode->next = NULL;
-
-
-    // printf("New node created - %s\n", newNode->data);
 
     if (s->head == NULL && s->tail == NULL) {
         // If the list is empty, update both head and tail pointers
@@ -115,13 +123,16 @@ bool soll_remove(soll* s, char* str) {
     free(current->data);  // Free the memory of the string data
     free(current);        // Free the memory of the node
 
+
     return true;  // Successfully removed the node
 }
 
 
 
-
+//1(1)|3(2)|2(1)|4(1)
 bool soll_isin(soll* s, char* str, long* cnt) {
+    (*cnt) = 0;
+    
     if (s == NULL || str == NULL) {
         return false;  // Invalid input or empty list, element not found
     }
@@ -129,15 +140,22 @@ bool soll_isin(soll* s, char* str, long* cnt) {
     Node* current = s->head;
     Node* previous = NULL;
 
+    //assuming the head is the first node to be accessed
+    if(current != NULL && strcmp(current->data, str) == 0){
+        *cnt = 1;
+        current->count++;
+        return true;
+    }
+
     // Traverse the list to find the node containing the string
     while (current != NULL && strcmp(current->data, str) != 0) {
         previous = current;
         current = current->next;
+        (*cnt)++;  // Increment the pointer-chase count (only if the element is not found)
     }
-    
 
     if (current == NULL) {
-        (*cnt)++;  // Increment the pointer-chase count (only if the element is not found)
+        *cnt = 0;
         return false;  // String not found in the list
     }
 
@@ -180,25 +198,7 @@ bool soll_isin(soll* s, char* str, long* cnt) {
                 }
                 prev_prev->next = current; // This updates the prev_prev->next pointer when moving the element closer to the front
             }
-
-        } else if (current != s->head) {
-            // This block executes when the accessed element is already at the front (but not the only element in the list)
-            Node* last = s->head;
-            while (last->next != NULL) {
-                last = last->next;
-            }
-            last->next = current;
-            s->head = current;
-            s->tail = previous; // Update the tail to the previous node since the current node is now at the end
-            current->next = NULL;
-
-            // Update the prev_prev->next pointer to point to current
-            Node* prev_prev = s->head;
-            while (prev_prev->next != current) {
-                prev_prev = prev_prev->next;
-            }
-            prev_prev->next = current;
-        }
+        } 
     }
     return true;  // Element found in the list
 }
@@ -221,7 +221,12 @@ int soll_freq(soll* s, char* str) {
 
     // If the element is found, return its frequency; otherwise, return 0
     return (current != NULL) ? current->count : 0;
+
 }
+
+
+
+
 
 //1 -> 2 -> 3
 int soll_size(soll* s) {
@@ -239,12 +244,13 @@ int soll_size(soll* s) {
     }
 
     return count;
+
 }
 
 
 void soll_tostring(soll* s, char* str) {
     if (s == NULL || str == NULL) {
-        return;  // Invalid input or empty list
+        on_error("Unable to generate string for SOLL\n");
     }
 
     Node* current = s->head;
@@ -279,6 +285,9 @@ void strfree(char* str) {
         free(str);
     }
 }
+
+
+
 
 // Clears up all space used
 bool soll_free(soll* s) {

@@ -46,7 +46,6 @@ soll* builddict(char* name, char* fname, orgtype type)
          done = true;
       }
       else{
-         printf("Word = %s\n", str);
          if(!soll_isin(s, str, &cnt)){
             soll_add(s, str);
          }
