@@ -20,6 +20,8 @@ char* strdup(const char* str) {
     char* new_str = (char*)ncalloc(len + 1, sizeof(char)); // +1 for null-terminator
 
     strcpy(new_str, str);
+    new_str[len] = '\0'; // Add the null-terminator at the end
+
     return new_str;
 }
 
@@ -30,7 +32,9 @@ Create an empty soll. Can be of type:
 'transpose' : When element is accessed it is moved one place closer to the front.
 */
 
+
 soll* soll_init(orgtype type) {
+
     soll* s = (soll*)ncalloc(1, sizeof(soll));
 
     s->head = NULL;
@@ -131,18 +135,12 @@ bool soll_remove(soll* s, char* str) {
 
 bool soll_isin(soll* s, char* str, long* cnt) {
 
-    if (s == NULL || str == NULL) {
+    if (s == NULL || str == NULL || cnt == NULL) {
         return false;  // Invalid input or empty list, element not found
     }
 
     Node* current = s->head;
     Node* previous = NULL;
-
-    // //assuming the head is the first node to be accessed
-    // if(current != NULL && strcmp(current->data, str) == 0){
-    //     (*cnt)++;
-    //     // current->count++;
-    // }
 
     // Traverse the list to find the node containing the string
     while (current != NULL && strcmp(current->data, str) != 0) {
@@ -305,7 +303,6 @@ bool soll_free(soll* s) {
     // Reset the head and tail pointers to NULL
     s->head = NULL;
     s->tail = NULL;
-
 
     free(s);
 
