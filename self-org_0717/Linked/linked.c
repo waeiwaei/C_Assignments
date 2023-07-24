@@ -129,10 +129,8 @@ bool soll_remove(soll* s, char* str) {
 
 
 
-//1(1)|3(2)|2(1)|4(1)
 bool soll_isin(soll* s, char* str, long* cnt) {
-    (*cnt) = 0;
-    
+
     if (s == NULL || str == NULL) {
         return false;  // Invalid input or empty list, element not found
     }
@@ -140,12 +138,11 @@ bool soll_isin(soll* s, char* str, long* cnt) {
     Node* current = s->head;
     Node* previous = NULL;
 
-    //assuming the head is the first node to be accessed
-    if(current != NULL && strcmp(current->data, str) == 0){
-        *cnt = 1;
-        current->count++;
-        return true;
-    }
+    // //assuming the head is the first node to be accessed
+    // if(current != NULL && strcmp(current->data, str) == 0){
+    //     (*cnt)++;
+    //     // current->count++;
+    // }
 
     // Traverse the list to find the node containing the string
     while (current != NULL && strcmp(current->data, str) != 0) {
@@ -155,7 +152,6 @@ bool soll_isin(soll* s, char* str, long* cnt) {
     }
 
     if (current == NULL) {
-        *cnt = 0;
         return false;  // String not found in the list
     }
 

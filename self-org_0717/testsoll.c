@@ -107,13 +107,12 @@ int main(void)
 
    assert(!soll_isin(testcases,"5", &count));
    assert(soll_freq(testcases,"5") == 0);
+   assert(count == 4);
+
 
    //Check if node it exists   
    assert(soll_isin(testcases, "4", &count));
-   assert(count == 3);
-
-   //check the pointer-chasing to reach node in the list which matches
-   assert(count == 3);
+   assert(count == 7);
 
    //Check the frequency of the node accessed
    assert(soll_freq(testcases,"4") == 2);
@@ -126,7 +125,7 @@ int main(void)
 
    //check the pointer chasing for node that is not in the list
    assert(!soll_isin(testcases,"5", &count));
-   assert(count == 0);
+   assert(count == 11);
 
    //Check if the removal works - non-edge cases
    assert(soll_remove(testcases, "3"));
@@ -164,6 +163,9 @@ int main(void)
    assert(soll_size(testcases)==2);
    soll_tostring(testcases, teststr);
 
+
+   count = 0;
+
    //Check if soll_free works
    assert(soll_free(testcases));
 
@@ -190,6 +192,7 @@ int main(void)
 
    //Check if node exist
    assert(soll_isin(testcases, "3", &count));
+   assert(count == 2);
    
    soll_tostring(testcases, teststr);
    //Check if node has moved to the front of list
@@ -198,13 +201,13 @@ int main(void)
    //check if Node->count has increased after soll_isin is used
    assert(soll_freq(testcases, "3") == 2);
    assert(soll_isin(testcases, "3", &count));
-   assert(count == 1);
+   assert(count == 2);
 
    soll_tostring(testcases, teststr);
    assert(strcmp(teststr, "3(3)|1(1)|2(1)|4(1)") == 0);
 
    assert(soll_isin(testcases, "2", &count));
-   assert(count == 2);
+   assert(count == 4);
    assert(soll_freq(testcases, "2") == 2);
 
    soll_tostring(testcases, teststr);
@@ -227,6 +230,8 @@ int main(void)
    soll_tostring(testcases, teststr);
    assert(strcmp(teststr, "1(1)") == 0);
    assert(soll_size(testcases) == 1);
+
+   count = 0;
 
    //Check if memory is freed
    assert(soll_free(testcases));
@@ -255,6 +260,7 @@ int main(void)
 
    //Check if node exist
    assert(soll_isin(testcases, "3", &count));
+   assert(count == 2);
 
    soll_tostring(testcases, teststr);
    //Check if node has moved to the front of list
@@ -270,11 +276,11 @@ int main(void)
    soll_tostring(testcases, teststr);
    assert(strcmp(teststr, "3(3)|1(1)|2(1)|4(1)") == 0 );
    assert(soll_freq(testcases, "3") == 3);
-   assert(count == 1);
+   assert(count == 3);
 
 
    assert(soll_isin(testcases, "2", &count));
-   assert(count == 2);
+   assert(count == 5);
    soll_tostring(testcases, teststr);
    assert(strcmp(teststr, "3(3)|2(2)|1(1)|4(1)") == 0 );
    assert(soll_freq(testcases, "2") == 2);
@@ -298,8 +304,159 @@ int main(void)
    assert(strcmp(teststr, "1(1)") == 0);
    assert(soll_size(testcases) == 1);
 
+   count = 0;
+
    //Check if memory is freed
    assert(soll_free(testcases));
+
+
+
+
+
+
+
+   //Compare the efficiency of between the different self-organising types for the same dataset and accessing different elements in each list
+   soll* solln = soll_init(none);
+   soll* sollmtf = soll_init(mtf);
+   soll* solltr = soll_init(transpose);
+
+   long sollncount = 0;
+   long sollmtfcount = 0;
+   long solltrcount = 0;
+
+   soll_add(solln, "one");
+   soll_add(solln, "two");
+   soll_add(solln, "three");
+   soll_add(solln, "four");
+   soll_add(solln, "five");
+   soll_add(solln, "six");
+   assert(soll_size(solln) == 6);
+   soll_tostring(solln, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|three(1)|four(1)|five(1)|six(1)") == 0);
+
+   soll_add(sollmtf, "one");
+   soll_add(sollmtf, "two");
+   soll_add(sollmtf, "three");
+   soll_add(sollmtf, "four");
+   soll_add(sollmtf, "five");
+   soll_add(sollmtf, "six");
+   assert(soll_size(sollmtf) == 6);
+   soll_tostring(sollmtf, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|three(1)|four(1)|five(1)|six(1)") == 0);
+
+
+   soll_add(solltr, "one");
+   soll_add(solltr, "two");
+   soll_add(solltr, "three");
+   soll_add(solltr, "four");
+   soll_add(solltr, "five");
+   soll_add(solltr, "six");
+   assert(soll_size(solltr) == 6);
+   soll_tostring(solltr, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|three(1)|four(1)|five(1)|six(1)") == 0);
+
+
+   //Accessing an element from the list - none
+   assert(soll_isin(solln, "five", &sollncount));
+   soll_tostring(solln, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|three(1)|four(1)|five(2)|six(1)") == 0);
+   assert(soll_freq(solln, "five") == 2);
+
+
+   //Accessing an element from the list - mtf
+   assert(soll_isin(sollmtf, "five", &sollmtfcount));
+   soll_tostring(sollmtf, teststr);
+   assert(strcmp(teststr, "five(2)|one(1)|two(1)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(solln, "five") == 2);
+
+
+   //Accessing an element from the list - transpose
+   assert(soll_isin(solltr, "five", &solltrcount));
+   soll_tostring(solltr, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|three(1)|five(2)|four(1)|six(1)") == 0);
+   assert(soll_freq(solln, "five") == 2);
+
+
+
+
+   //Accessing the same element and comparing the difference between orgtypes in retrieving the element
+   //Accessing an element from the list - none
+   assert(soll_isin(solln, "five", &sollncount));
+   assert(sollncount == 8);
+   soll_tostring(solln, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|three(1)|four(1)|five(3)|six(1)") == 0);
+   assert(soll_freq(solln, "five") == 3);
+
+   assert(soll_isin(solln, "one", &sollncount));
+   assert(sollncount == 8);
+   soll_tostring(solln, teststr);
+   assert(strcmp(teststr, "one(2)|two(1)|three(1)|four(1)|five(3)|six(1)") == 0);
+   assert(soll_freq(solln, "one") == 2);
+
+   //Accessing an element which does not exist -> current implementation will traverse the list and continue to increment the value of cnt
+   assert(soll_remove(solln, "four"));
+   assert(soll_size(solln) == 5);
+   soll_tostring(solln, teststr);
+   assert(strcmp(teststr, "one(2)|two(1)|three(1)|five(3)|six(1)") == 0);
+
+   assert(!soll_isin(solln, "four", &sollncount));
+   assert(sollncount == 13);
+
+
+   //Accessing an element from the list - mtf
+   assert(soll_isin(sollmtf, "five", &sollmtfcount));
+   assert(sollmtfcount == 4);
+   soll_tostring(sollmtf, teststr);
+   assert(strcmp(teststr, "five(3)|one(1)|two(1)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(sollmtf, "five") == 3);
+
+   assert(soll_isin(sollmtf, "one", &sollmtfcount));
+   assert(sollmtfcount == 5);
+   soll_tostring(sollmtf, teststr);
+   assert(strcmp(teststr, "one(2)|five(3)|two(1)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(sollmtf, "one") == 2);
+
+
+   //Accessing an element which does not exist -> current implementation will traverse the list and continue to increment the value of cnt
+   assert(soll_remove(sollmtf, "four"));
+   assert(soll_size(sollmtf) == 5);
+   soll_tostring(sollmtf, teststr);
+   assert(strcmp(teststr, "one(2)|five(3)|two(1)|three(1)|six(1)") == 0);
+
+   assert(!soll_isin(sollmtf, "four", &sollmtfcount));
+   assert(sollmtfcount == 10);
+
+
+   //Accessing an element from the list - transpose
+   assert(soll_isin(solltr, "five", &solltrcount));
+   assert(solltrcount == 7);
+   soll_tostring(solltr, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|five(3)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(solltr, "five") == 3);
+
+
+   assert(soll_isin(solltr, "one", &solltrcount));
+   assert(solltrcount == 7);
+   soll_tostring(solltr, teststr);
+   assert(strcmp(teststr, "one(2)|two(1)|five(3)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(solltr, "one") == 2);
+
+   //Accessing an element which does not exist -> current implementation will traverse the list and continue to increment the value of cnt
+   assert(soll_remove(solltr, "four"));
+   assert(soll_size(solltr) == 5);
+   soll_tostring(solltr, teststr);
+   assert(strcmp(teststr, "one(2)|two(1)|five(3)|three(1)|six(1)") == 0);
+
+   assert(!soll_isin(solltr, "four", &solltrcount));
+   assert(solltrcount == 12);
+
+
+
+
+   //Free memory allocated
+   assert(soll_free(solln));
+   assert(soll_free(sollmtf));
+   assert(soll_free(solltr));
 
    return 0;
 }
