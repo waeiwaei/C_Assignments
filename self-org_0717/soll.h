@@ -2,7 +2,7 @@
 
 typedef struct soll soll;
 
-typedef enum{none, mtf, transpose} orgtype;
+typedef enum{none, mtf, transpose, frequency} orgtype;
 
 #include <stdio.h>
 #include <stdlib.h>

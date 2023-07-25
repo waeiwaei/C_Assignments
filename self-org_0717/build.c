@@ -17,19 +17,23 @@ int main(int argc, char* argv[])
       fprintf(stderr, "Usage : %s <book.txt>\n", argv[0]);
       exit(EXIT_FAILURE);
    }
-   soll* sn, *st, *sm;
+   soll* sn, *st, *sm, *sf;
 
    sn = builddict("None", argv[1], none);
    st = builddict("Transpose", argv[1], transpose);
    sm = builddict("MTF", argv[1], mtf);
+   sf = builddict("Frequency", argv[1], frequency);
 
    assert(soll_freq(sn, "and")==soll_freq(sm, "and"));
    assert(soll_freq(sn, "and")==soll_freq(st, "and"));
+   assert(soll_freq(sn, "and")==soll_freq(sf, "and"));
    printf("\nThe word \"and\" appears %d times\n", soll_freq(st, "and"));
 
    assert(soll_free(sn));
    assert(soll_free(st));
    assert(soll_free(sm));
+   assert(soll_free(sf));
+
    return EXIT_SUCCESS;
 }
 
