@@ -30,6 +30,14 @@ void test_soll_freq();
 // Test case for soll_size
 void test_soll_size();
 
+void test_soll_isin();
+void test_soll_isin_mtf();
+void test_soll_isin_transpose();
+void test_soll_isin_frequency();
+void test_mtf_reorg();
+void test_transpose_reorg();
+void test_frequency_reorg();
+
 
 int main(void)
 {
@@ -131,7 +139,7 @@ int main(void)
    test_soll_tostring();
    test_soll_size();
    test_soll_freq();
-
+   test_soll_isin();
 
    return 0;
 }
@@ -150,7 +158,6 @@ void test_white_box(){
 
 
 void test_white_box_none(){
-   //White-box testing
 
    //Organisation type: None
    soll* testcases = soll_init(none);
@@ -233,6 +240,8 @@ void test_white_box_none(){
 }
 
 void test_white_box_mtf(){
+
+   //Organisation type: MTF
    soll* testcases = soll_init(none);
    long count = 0;
    char teststr[LISTSTRLEN];
@@ -300,10 +309,13 @@ void test_white_box_mtf(){
    //Check if memory is freed
    assert(soll_free(testcases));
 
-
 }
 
+
+
 void test_white_box_tr(){
+
+   //Organisation type: Transpose
    soll* testcases = soll_init(none);
    long count = 0;
    char teststr[LISTSTRLEN];
@@ -378,6 +390,101 @@ void test_white_box_tr(){
 
 }
 
+
+void test_white_box_frequency(){
+
+   //Organisation type: Frequency
+   soll* testcases = soll_init(frequency);
+   long count = 0;
+   char teststr[LISTSTRLEN];
+
+   //Accessing node which do not exist in the list
+   assert(soll_size(testcases) == 0);
+   assert(!soll_isin(testcases, "1", &count));
+   assert(count == 0);
+   assert(soll_freq(testcases,"1") == 0);
+   assert(!soll_remove(testcases, "1"));
+
+   soll_add(testcases, "1");
+   soll_add(testcases, "2");
+   soll_add(testcases, "3");
+   soll_add(testcases, "4");
+
+   assert(!soll_isin(testcases,"5", &count));
+   assert(soll_freq(testcases,"5") == 0);
+   assert(count == 4);
+
+
+   //Check if node it exists   
+   assert(soll_isin(testcases, "4", &count));
+   assert(count == 7);
+
+   //Check the frequency of the node accessed
+   assert(soll_freq(testcases,"4") == 2);
+   soll_tostring(testcases, teststr);
+
+   //Check if the list is re-arranged, no change in "none" 
+   assert(strcmp(teststr, "1(1)|2(1)|4(2)|3(1)") != 0);
+   assert(strcmp(teststr, "1(1)|2(1)|3(1)|4(2)") != 0);
+   assert(strcmp(teststr, "4(2)|1(1)|2(1)|3(1)") == 0);
+
+
+   //check the pointer chasing for node that is not in the list
+   assert(!soll_isin(testcases,"5", &count));
+   assert(count == 11);
+
+   //Check if the removal works - non-edge cases
+   assert(soll_remove(testcases, "3"));
+   assert(soll_freq(testcases, "3") == 0);
+   assert(!soll_isin(testcases, "3", &count));
+   soll_tostring(testcases, teststr);
+   assert(strcmp(teststr, "4(2)|1(1)|2(1)") == 0);
+   assert(soll_size(testcases) == 3);
+
+   //Check if the removal works - edge cases (removal of last node)
+   soll_add(testcases, "5");
+   soll_tostring(testcases, teststr);
+   assert(strcmp(teststr, "4(2)|1(1)|2(1)|5(1)") == 0);
+
+   assert(soll_remove(testcases, "5"));
+   soll_tostring(testcases, teststr);
+   assert(strcmp(teststr, "4(2)|1(1)|2(1)") == 0);
+
+   //Check if the removal works - edge cases (removal of first node)
+   assert(soll_remove(testcases, "1"));
+   soll_tostring(testcases, teststr);
+   assert(strcmp(teststr, "4(2)|2(1)") == 0);
+   assert(soll_size(testcases) == 2);
+
+   //Check if removal works if the node doesnt exist in the list
+   assert(!soll_remove(testcases, "1"));
+   assert(soll_size(testcases) == 2);
+   soll_tostring(testcases, teststr);
+   assert(strcmp(teststr, "4(2)|2(1)") == 0);
+   assert(soll_size(testcases) == 2);
+
+
+   //Check for non-string values entered
+   soll_add(testcases, "");
+   assert(soll_size(testcases) == 2);
+   soll_tostring(testcases, teststr);
+
+   //Removing all values
+   assert(soll_remove(testcases, "4"));
+   assert(soll_size(testcases) == 1);
+   assert(soll_freq(testcases, "4") == 0);
+
+   assert(soll_remove(testcases, "2"));
+   assert(soll_freq(testcases, "2") == 0);
+   assert(soll_size(testcases) == 0);
+
+
+   //Check if soll_free works
+   assert(soll_free(testcases));
+
+}
+
+
 void test_black_box_transpose(){
 
    soll* solltr = soll_init(transpose);
@@ -449,6 +556,7 @@ void test_black_box_transpose(){
 }
 
 void test_black_box_mtf(){
+
    soll* sollmtf = soll_init(mtf);
    char teststr[LISTSTRLEN];
    long sollmtfcount = 0;
@@ -520,7 +628,6 @@ void test_black_box_mtf(){
 
 void test_black_box_none(){
 
-   //Compare the efficiency of between the different self-organising types for the same dataset and accessing different elements in each list
    soll* solln = soll_init(none);
    char teststr[LISTSTRLEN];
    long sollncount = 0;
@@ -591,11 +698,100 @@ void test_black_box_none(){
 }
 
 
+
+void test_black_box_frequency(){
+
+   soll* sollfreq = soll_init(frequency);
+   char teststr[LISTSTRLEN];
+   long sollfreqcount = 0;
+
+   soll_add(sollfreq, "one");
+   soll_add(sollfreq, "two");
+   soll_add(sollfreq, "three");
+   soll_add(sollfreq, "four");
+   soll_add(sollfreq, "five");
+   soll_add(sollfreq, "six");
+   assert(soll_size(sollfreq) == 6);
+   soll_tostring(sollfreq, teststr);
+   assert(strcmp(teststr, "one(1)|two(1)|three(1)|four(1)|five(1)|six(1)") == 0);
+
+
+   assert(soll_isin(sollfreq, "five", &sollfreqcount));
+   soll_tostring(sollfreq, teststr);
+   assert(strcmp(teststr, "five(2)|one(1)|two(1)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(sollfreq, "five") == 2);
+
+   assert(soll_isin(sollfreq, "five", &sollfreqcount));
+
+   assert(sollfreqcount == 4);
+   soll_tostring(sollfreq, teststr);
+   assert(strcmp(teststr, "five(3)|one(1)|two(1)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(sollfreq, "five") == 3);
+
+   assert(soll_isin(sollfreq, "one", &sollfreqcount));
+   assert(sollfreqcount == 5);
+   soll_tostring(sollfreq, teststr);
+   assert(strcmp(teststr, "five(3)|one(2)|two(1)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(sollfreq, "one") == 2);
+
+
+   assert(soll_isin(sollfreq, "two", &sollfreqcount));
+   assert(sollfreqcount == 7);
+   soll_tostring(sollfreq, teststr);
+   assert(strcmp(teststr, "five(3)|one(2)|two(2)|three(1)|four(1)|six(1)") == 0);
+   assert(soll_freq(sollfreq, "two") == 2);
+
+   assert(soll_isin(sollfreq, "six", &sollfreqcount));
+   assert(sollfreqcount == 12);
+   soll_tostring(sollfreq, teststr);
+   assert(strcmp(teststr, "five(3)|six(2)|one(2)|two(2)|three(1)|four(1)") == 0);
+   assert(soll_freq(sollfreq, "six") == 2);
+
+
+   //Accessing an element which does not exist -> current implementation will traverse the list and continue to increment the value of cnt
+   assert(soll_remove(sollfreq, "four"));
+   assert(soll_size(sollfreq) == 5);
+   soll_tostring(sollfreq, teststr);
+   assert(strcmp(teststr, "five(3)|six(2)|one(2)|two(2)|three(1)") == 0);
+
+   assert(!soll_isin(sollfreq, "four", &sollfreqcount));
+   assert(sollfreqcount == 17);
+
+   assert(soll_remove(sollfreq, "one"));
+   assert(soll_size(sollfreq) == 4);
+
+   //return false if the node to remove does not exist
+   assert(!soll_remove(sollfreq, "one"));
+   assert(soll_size(sollfreq) == 4);
+
+   assert(soll_remove(sollfreq, "two"));   
+   assert(soll_size(sollfreq) == 3);
+
+   assert(soll_remove(sollfreq, "three"));   
+   assert(soll_size(sollfreq) == 2);
+
+   assert(soll_remove(sollfreq, "six"));   
+   assert(soll_size(sollfreq) == 1);
+
+   assert(soll_remove(sollfreq, "five"));   
+   assert(soll_size(sollfreq) == 0);
+
+
+   //Free memory allocated
+   assert(soll_free(sollfreq));
+
+}
+
+
+
+
+
 void test_black_box(){
 
    test_black_box_none();
    test_black_box_mtf();
    test_black_box_transpose();
+   test_black_box_frequency();
 
 }
 
@@ -603,9 +799,9 @@ void test_black_box(){
 // Test case for soll_init
 void test_soll_init() {
 
-   for (int method = none; method <= transpose; method++) {
+   for (int method = none; method <= frequency; method++) {
+
       soll* s = soll_init((orgtype)method);
-      //Org Type: None
       assert(s != NULL);
       assert(s->head == NULL);
       assert(s->tail == NULL);
@@ -623,7 +819,7 @@ void test_soll_init() {
 // Test case for soll_add
 void test_soll_add() {
 
-   for (int method = none; method <= transpose; method++) {
+   for (int method = none; method <= frequency; method++) {
       soll* s = soll_init((orgtype)method);
       long count = 0;
       soll_add(s, "apple");
@@ -631,6 +827,9 @@ void test_soll_add() {
       soll_add(s, "");
       soll_add(s, NULL);
 
+      assert(s->tail != NULL);
+      assert(strcmp(s->tail->data, "") != 0);
+      assert(strcmp(s->tail->data,"banana") == 0);
       assert(soll_size(s) == 2); // Check the size of the list
       assert(soll_isin(s, "apple", &count) == true); // Check if "apple" is in the list
       assert(soll_isin(s, "orange", &count) == false); // Check if "orange" is not in the list
@@ -642,6 +841,8 @@ void test_soll_add() {
 
    }
 
+
+
 }
 
 
@@ -651,7 +852,7 @@ void test_soll_add() {
 // Test case for soll_remove
 void test_soll_remove() {
 
-   for (int method = none; method <= transpose; method++) {
+   for (int method = none; method <= frequency; method++) {
       soll* s = soll_init((orgtype)method);
       long count = 0;
       char teststr[LISTSTRLEN];
@@ -666,9 +867,12 @@ void test_soll_remove() {
       assert(soll_remove(s, "banana") == true); // Remove "banana"
       assert(soll_size(s) == 2); // Check the size of the list after removal
       assert(!soll_isin(s, "banana", &count)); // Check if "banana" is not in the list after removal
-
       assert(soll_remove(s, "banana") == false); // Try to remove "orange" (not in the list)
       assert(soll_size(s) == 2); // Size should remain unchanged
+      assert(soll_remove(s, "apple") == true); // Try to remove "orange" (not in the list)
+      assert(soll_size(s) == 1); // Size should remain unchanged
+      assert(soll_remove(s, "orange") == true); // Try to remove "orange" (not in the list)
+      assert(soll_size(s) == 0); // Size should remain unchanged
 
       soll_tostring(s,teststr);
 
@@ -754,15 +958,34 @@ void test_soll_tostring() {
 
    soll_free(s);
 
+
+   //Org Type: Transpose
+   s = soll_init(frequency);
+   soll_add(s, "apple");
+   soll_add(s, "banana");
+   soll_add(s, "orange");
+
+   soll_tostring(s, str);
+
+   // The resulting string should be in the format: "apple(1)|banana(1)|orange(1)"
+   assert(strcmp(str, "apple(1)|banana(1)|orange(1)") == 0);
+
+   soll_isin(s, "banana", &count);
+
+   soll_tostring(s, str);
+   assert(strcmp(str, "banana(2)|apple(1)|orange(1)") == 0);
+
+   count = 0;
+
+   soll_free(s);
+
 }
-
-
 
 
 // Test case for soll_freq
 void test_soll_freq() {
     // Test with each method (none, mtf, and transpose)
-    for (int method = none; method <= transpose; method++) {
+    for (int method = none; method <= frequency; method++) {
       soll* s = soll_init((orgtype)method);
       soll_add(s, "apple");
       soll_add(s, "banana");
@@ -785,7 +1008,7 @@ void test_soll_freq() {
 // Test case for soll_size
 void test_soll_size() {
     // Test with each method (none, mtf, and transpose)
-    for (int method = none; method <= transpose; method++) {
+    for (int method = none; method <= frequency; method++) {
       soll* s = soll_init((orgtype)method);
       assert(soll_size(s) == 0); // Empty list, size should be 0
 
@@ -809,3 +1032,267 @@ void test_soll_size() {
     }
 }
 
+
+void test_soll_isin(){
+
+   test_soll_isin_mtf();
+   test_soll_isin_transpose();
+   test_soll_isin_frequency();
+
+   // test_mtf_reorg();
+   // test_transpose_reorg();
+   // test_frequency_reorg();
+}
+
+
+void test_soll_isin_mtf() {
+
+   soll* s = soll_init(mtf);
+   long cnt = 0;
+   char teststr[LISTSTRLEN];
+
+   soll_add(s, "apple");
+   soll_add(s, "banana");
+   soll_add(s, "orange");
+   soll_add(s, "pineapple");
+   soll_add(s, "strawberry");
+   soll_add(s, "peach");
+   soll_add(s, "avocado");
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "apple(1)|banana(1)|orange(1)|pineapple(1)|strawberry(1)|peach(1)|avocado(1)") == 0);
+
+
+   // Test element presence
+   assert(soll_isin(s, "banana", &cnt) == true);
+   assert(cnt == 1); // The element was found in the list
+   assert(strcmp(s->head->data,"banana") == 0);
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "banana(2)|apple(1)|orange(1)|pineapple(1)|strawberry(1)|peach(1)|avocado(1)") == 0);
+
+
+   // Test element absence
+   assert(soll_isin(s, "grape", &cnt) == false);
+   assert(cnt == 8); // The cnt variable should be incremented since the element is not found
+   assert(strcmp(s->head->data,"banana") == 0); // head of the list should still be "banana"
+
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "banana(2)|apple(1)|orange(1)|pineapple(1)|strawberry(1)|peach(1)|avocado(1)") == 0);
+
+
+   // Test element presence (after accessing an element)
+   assert(soll_isin(s, "peach", &cnt) == true);
+   assert(cnt == 13); // The element was found in the list
+   assert(strcmp(s->head->data,"peach") == 0); // head of the list should still be "banana"
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "peach(2)|banana(2)|apple(1)|orange(1)|pineapple(1)|strawberry(1)|avocado(1)") == 0);
+
+
+
+   // Test reorganization (move to front)
+   assert(soll_isin(s, "pineapple", &cnt) == true);
+   assert(cnt == 17); // The element was found in the list, and mtf reorganization should occur
+   assert(strcmp(s->head->data,"pineapple") == 0); 
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "pineapple(2)|peach(2)|banana(2)|apple(1)|orange(1)|strawberry(1)|avocado(1)") == 0);
+
+
+
+
+   soll_free(s);
+}
+
+
+
+void test_soll_isin_transpose() {
+
+   soll* s = soll_init(transpose);
+   long cnt = 0;
+   char teststr[LISTSTRLEN];
+
+   soll_add(s, "apple");
+   soll_add(s, "banana");
+   soll_add(s, "orange");
+   soll_add(s, "pineapple");
+   soll_add(s, "strawberry");
+   soll_add(s, "peach");
+   soll_add(s, "avocado");
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "apple(1)|banana(1)|orange(1)|pineapple(1)|strawberry(1)|peach(1)|avocado(1)") == 0);
+
+
+   // Test element presence
+   assert(soll_isin(s, "banana", &cnt) == true);
+   assert(cnt == 1); 
+   assert(strcmp(s->head->data,"banana") == 0); // head of the list should be "banana"
+
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "banana(2)|apple(1)|orange(1)|pineapple(1)|strawberry(1)|peach(1)|avocado(1)") == 0);
+
+
+
+   // Test element presence (after accessing an element)
+   assert(strcmp(s->head->next->next->next->next->data, "strawberry") == 0);   //Checking that "strawberry" is 5th Node in list
+   assert(soll_isin(s, "strawberry", &cnt) == true);
+   assert(cnt == 5); // The element was found in the list
+   assert(strcmp(s->head->next->next->next->data, "strawberry") == 0);  //Checking that "strawberry" is 4th Node in list, after calling soll_isin()
+
+   // Test element presence (after accessing an last element)
+   assert(strcmp(s->tail->data, "avocado") == 0);   \
+   assert(soll_isin(s, "avocado", &cnt) == true);
+   assert(cnt == 11); // The element was found in the list
+   assert(strcmp(s->head->next->next->next->next->next->data, "avocado") == 0);  
+   assert(strcmp(s->tail->data, "peach") == 0);   
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "banana(2)|apple(1)|orange(1)|strawberry(2)|pineapple(1)|avocado(2)|peach(1)") == 0);
+
+   //Test element presence (middle element in the list)
+   assert(strcmp(s->head->next->next->next->next->data, "pineapple") == 0);
+   assert(soll_isin(s, "pineapple", &cnt) == true);
+   assert(strcmp(s->head->next->next->next->data, "pineapple") == 0);
+
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "banana(2)|apple(1)|orange(1)|pineapple(2)|strawberry(2)|avocado(2)|peach(1)") == 0);
+
+   soll_free(s);
+}
+
+
+
+void test_soll_isin_frequency() {
+
+   soll* s = soll_init(frequency);
+   long cnt = 0;
+
+   char teststr[LISTSTRLEN];
+
+   soll_add(s, "apple");
+   soll_add(s, "banana");
+   soll_add(s, "orange");
+   soll_add(s, "pineapple");
+   soll_add(s, "strawberry");
+   soll_add(s, "peach");
+   soll_add(s, "avocado");
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "apple(1)|banana(1)|orange(1)|pineapple(1)|strawberry(1)|peach(1)|avocado(1)") == 0);
+
+   // Test element presence
+   assert(soll_isin(s, "orange", &cnt) == true);
+   assert(cnt == 2); 
+   assert(strcmp(s->head->data,"orange") == 0); 
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "orange(2)|apple(1)|banana(1)|pineapple(1)|strawberry(1)|peach(1)|avocado(1)") == 0);
+
+
+   // Test element presence (after accessing an element)
+   assert(strcmp(s->head->next->next->next->next->data, "strawberry") == 0);   
+   assert(soll_isin(s, "strawberry", &cnt) == true);
+   assert(soll_freq(s, "strawberry") == 2);
+   assert(cnt == 6); 
+
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "strawberry(2)|orange(2)|apple(1)|banana(1)|pineapple(1)|peach(1)|avocado(1)") == 0);
+   assert(strcmp(s->head->data, "strawberry") == 0);  
+
+
+   // Test element presence (after accessing an last element)
+   assert(strcmp(s->tail->data, "avocado") == 0);   
+   assert(soll_isin(s, "avocado", &cnt) == true);
+   assert(soll_freq(s, "avocado") == 2);
+   assert(strcmp(s->tail->data, "peach") == 0);
+   assert(strcmp(s->head->data, "avocado") == 0);  
+   soll_tostring(s, teststr);
+
+   assert(strcmp(teststr, "avocado(2)|strawberry(2)|orange(2)|apple(1)|banana(1)|pineapple(1)|peach(1)") == 0);
+
+   assert(cnt == 12); 
+   assert(soll_isin(s, "strawberry", &cnt) == true);
+   assert(soll_freq(s, "strawberry") == 3);
+   assert(cnt == 13); 
+   soll_tostring(s, teststr);
+   assert(strcmp(teststr, "strawberry(3)|avocado(2)|orange(2)|apple(1)|banana(1)|pineapple(1)|peach(1)") == 0);
+
+   soll_free(s);
+}
+
+
+
+// void test_mtf_reorg() {
+
+//    soll* s = soll_init(mtf);
+
+//    soll_add(s, "apple");
+//    soll_add(s, "banana");
+//    soll_add(s, "orange");
+
+
+//    // Move "banana" to the front
+//    Node* current = s->head->next->next;
+//    Node* previous = s->head;
+//    mtf_reorg(s, current, previous);
+
+//    // Verify that "orange" is now at the front
+//    assert(strcmp(s->head->data, "orange") == 0);
+
+//    soll_free(s);
+
+// }
+
+
+
+// void test_transpose_reorg() {
+//    soll* s = soll_init(transpose);
+
+//    soll_add(s, "apple");
+//    soll_add(s, "banana");
+//    soll_add(s, "orange");
+
+//    // Move "banana" one position closer to the front
+//    Node* current = s->head->next->next;
+//    Node* previous = s->head->next;
+//    transpose_reorg(s, current, previous);
+
+//    // Verify that "banana" is now at the front, and the order is updated
+//    assert(strcmp(s->head->data, "apple") == 0);
+//    assert(strcmp(s->head->next->data, "orange") == 0);
+//    assert(strcmp(s->head->next->next->data, "banana") == 0);
+
+//    soll_free(s);
+//    // free(current);
+//    // free(previous);
+   
+// }
+
+
+
+// void test_frequency_reorg() {
+//    soll* s = soll_init(frequency);
+
+//    soll_add(s, "apple");
+//    soll_add(s, "banana");
+//    soll_add(s, "orange");
+
+//    // Access "banana" and increase its count to 2
+//    Node* current = s->head->next->next;
+//    Node* previous = s->head->next;
+//    current->count = 2;
+//    frequency_reorg(s, current, previous);
+
+//    // Verify that "banana" is moved before "apple" based on frequency
+//    assert(strcmp(s->head->data, "orange") == 0);
+//    assert(strcmp(s->head->next->data, "apple") == 0);
+//    assert(strcmp(s->head->next->next->data, "banana") == 0);
+
+//    soll_free(s);
+//    // free(current);
+//    // free(previous);
+// }

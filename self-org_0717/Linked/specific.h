@@ -18,4 +18,8 @@ struct soll{
 	int count;
 };
 
+bool frequency_reorg(soll* s, Node* current, Node* previous);
+bool transpose_reorg(soll* s, Node* current, Node* previous);
+bool mtf_reorg(soll* s, Node* current, Node* previous);
+
 #endif /* SPECIFIC_H */
