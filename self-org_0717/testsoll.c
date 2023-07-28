@@ -37,10 +37,12 @@ void test_soll_isin_frequency();
 void test_mtf_reorg();
 void test_transpose_reorg();
 void test_frequency_reorg();
-
+void test();
 
 int main(void)
 {
+   test();
+
    char str[LISTSTRLEN];
    long cnt = 0;
    printf("Test Self-Org LL (%s) Start ... ", SOLLTYPE);
@@ -120,11 +122,12 @@ int main(void)
 
    printf("End\n");
 
+   return 0;
+}
 
 
-// ------------------------------- Testing for functions  ---------------------------------------------
 
-
+void test(){
 
    //Whitebox testing
    test_white_box();
@@ -141,10 +144,7 @@ int main(void)
    test_soll_freq();
    test_soll_isin();
 
-   return 0;
 }
-
-
 
 
 
