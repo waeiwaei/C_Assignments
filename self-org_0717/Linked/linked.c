@@ -239,69 +239,14 @@ bool soll_isin(soll* s, char* str, long* cnt) {
 
     // Reorganize the list based on s->type
     if (s->type == mtf) {
-        // Move the accessed element to the front of the list
-        // if (previous != NULL) {
-        //     previous->next = current->next;
-
-        //     if(current->next == NULL){
-        //         s->tail = previous;
-        //     }
-
-        //     current->next = s->head;
-        //     s->head = current;
-        // }
+ 
         mtf_reorg(s, current, previous);
 
     } else if (s->type == transpose) {
-        // // Move the accessed element one position closer to the front
-        // if (previous != NULL) {
-        //     // This block executes when the accessed element is not already at the front
-        //     previous->next = current->next;
 
-        //     if (current->next == NULL) {
-        //         // Update the tail to the correct new tail node
-        //         s->tail = previous;
-        //     }
-
-        //     current->next = previous;
-        //     if (s->head == previous) {
-        //         s->head = current;
-        //     } else {
-        //         Node* prev_prev = s->head;
-        //         while (prev_prev->next != previous) {
-        //             prev_prev = prev_prev->next;
-        //         }
-        //         prev_prev->next = current; // This updates the prev_prev->next pointer when moving the element closer to the front
-        //     }
-        // } 
         transpose_reorg(s, current, previous);
 
     } else if (s->type == frequency) {
-        // if (previous != NULL && current->count > previous->count) {
-
-        //     // remove current from the linked list
-        //     if (current == s->tail) {
-        //         s->tail = previous;
-        //     }
-        //     previous->next = current->next;
-
-        //     // insert current into the linked list
-        //     if (s->head->count <= current->count) {
-        //         current->next = s->head;
-        //         s->head = current;
-        //     }
-
-        //     else {
-        //         Node* cursor = s->head;
-        //         while (/*cursor->next != NULL &&*/ cursor->next->count > current->count) {
-        //             cursor = cursor->next;
-        //         }
-        //         // cursor->next is the first element which is <= current
-        //         // |cursor|  ->  |current|  ->  |cursor->next|
-        //         current->next = cursor->next;
-        //         cursor->next = current;    
-        //     }
-        // }
 
         frequency_reorg(s, current, previous);
 
