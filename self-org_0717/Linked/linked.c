@@ -9,7 +9,8 @@
 //!!!!REMOVE MAGIC NUMBERS!!!!!
 
 #define MAX_STR_LEN 10000
-
+#define ZERO 0
+#define ONE 1
 
 char* strdup(const char* str) {
     if (str == NULL) {
@@ -17,7 +18,7 @@ char* strdup(const char* str) {
     }
 
     size_t len = strlen(str);
-    char* new_str = (char*)ncalloc(len + 1, sizeof(char)); // +1 for null-terminator
+    char* new_str = (char*)ncalloc(len + ONE, sizeof(char)); // +1 for null-terminator
 
     strcpy(new_str, str);
     new_str[len] = '\0'; // Add the null-terminator at the end
@@ -35,44 +36,27 @@ Create an empty soll. Can be of type:
 
 soll* soll_init(orgtype type) {
 
-    soll* s = (soll*)ncalloc(1, sizeof(soll));
+    soll* s = (soll*)ncalloc(ONE, sizeof(soll));
 
     s->head = NULL;
     s->tail = NULL;
     s->type = type;
-    s->count = 0;
+    s->count = ZERO;
 
     return s;
 }
 
 
 
-// Helper function to check if the input is a valid C-style string
-bool is_valid_c_string(char* str) {
-    if (str == NULL) {
-        return false;
-    }
-
-    // Check if the string is null-terminated
-    for (size_t i = 0; str[i] != '\0'; i++) {
-        // Optionally, you can perform additional checks here
-        // to ensure that str contains valid characters.
-        // For example, you can check if the characters are within a certain range.
-    }
-
-    return true;
-}
-
-
 void soll_add(soll* s, char* str) {
-    if (s == NULL || str == NULL || strlen(str) == 0) {
+    if (s == NULL || str == NULL || strlen(str) == ZERO) {
         return;
     }
 
     // Create a new node and set its value
-    Node* newNode = (Node*)ncalloc(1, sizeof(Node));
+    Node* newNode = (Node*)ncalloc(ONE, sizeof(Node));
     newNode->data = strdup(str); // Deep copy the string
-    newNode->count = 1;
+    newNode->count = ONE;
     newNode->next = NULL;
 
     if (s->head == NULL && s->tail == NULL) {
@@ -101,7 +85,7 @@ bool soll_remove(soll* s, char* str) {
     Node* previous = NULL;
 
     // Traverse the list to find the node containing the string
-    while (current != NULL && strcmp(current->data, str) != 0) {
+    while (current != NULL && strcmp(current->data, str) != ZERO) {
         previous = current;
         current = current->next;
     }
@@ -262,18 +246,18 @@ bool soll_isin(soll* s, char* str, long* cnt) {
 
 int soll_freq(soll* s, char* str) {
     if (s == NULL || str == NULL) {
-        return 0;  // Invalid input or empty list, frequency is zero
+        return ZERO;  // Invalid input or empty list, frequency is zero
     }
 
     Node* current = s->head;
 
     // Traverse the list to find the node containing the string
-    while (current != NULL && strcmp(current->data, str) != 0) {
+    while (current != NULL && strcmp(current->data, str) != ZERO) {
         current = current->next;
     }
 
     // If the element is found, return its frequency; otherwise, return 0
-    return (current != NULL) ? current->count : 0;
+    return (current != NULL) ? current->count : ZERO;
 
 }
 
@@ -284,10 +268,10 @@ int soll_freq(soll* s, char* str) {
 //1 -> 2 -> 3
 int soll_size(soll* s) {
     if (s == NULL || s->head == NULL) {
-        return 0;  // Empty list, size is zero
+        return ZERO;  // Empty list, size is zero
     }
 
-    int count = 0;
+    int count = ZERO;
     Node* current = s->head;
 
     // Traverse the list and count the number of elements
@@ -307,7 +291,7 @@ void soll_tostring(soll* s, char* str) {
     }
 
     Node* current = s->head;
-    int offset = 0;
+    int offset = ZERO;
 
     // Traverse the list and append each element's data and frequency to the string
     while (current != NULL) {
@@ -321,7 +305,7 @@ void soll_tostring(soll* s, char* str) {
         // If there are more elements, append the separator "|"
         if (current->next != NULL) {
             written = snprintf(str + offset, MAX_STR_LEN - offset, "|");
-            if (written < 0 || written >= (MAX_STR_LEN - offset)) {
+            if (written < ZERO || written >= (MAX_STR_LEN - offset)) {
                 // Handle potential error or buffer overflow
                 return;
             }
