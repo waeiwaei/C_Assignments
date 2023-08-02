@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-//!!!!REMOVE MAGIC NUMBERS!!!!!
 
 #define MAX_STR_LEN 10000
 #define ZERO 0
@@ -26,12 +25,6 @@ char* strdup(const char* str) {
     return new_str;
 }
 
-/*
-Create an empty soll. Can be of type:
-'none'      : Unsorted linked list.
-'mtf'       : When element is accessed it is moved to the front.
-'transpose' : When element is accessed it is moved one place closer to the front.
-*/
 
 
 soll* soll_init(orgtype type) {
@@ -56,7 +49,7 @@ void soll_add(soll* s, char* str) {
     // Create a new node and set its value
     Node* newNode = (Node*)ncalloc(ONE, sizeof(Node));
     newNode->data = strdup(str); // Deep copy the string
-    newNode->count = ONE;
+    newNode->frequency = ONE;
     newNode->next = NULL;
 
     if (s->head == NULL && s->tail == NULL) {
@@ -167,7 +160,7 @@ bool transpose_reorg(soll* s, Node* current, Node* previous){
 
 bool frequency_reorg(soll* s, Node* current, Node* previous){
 
-    if (previous != NULL && current->count > previous->count) {
+    if (previous != NULL && current->frequency > previous->frequency) {
 
         // remove current from the linked list
         if (current == s->tail) {
@@ -176,14 +169,14 @@ bool frequency_reorg(soll* s, Node* current, Node* previous){
         previous->next = current->next;
 
         // insert current into the linked list
-        if (s->head->count <= current->count) {
+        if (s->head->frequency <= current->frequency) {
             current->next = s->head;
             s->head = current;
         }
 
         else {
             Node* cursor = s->head;
-            while (/*cursor->next != NULL &&*/ cursor->next->count > current->count) {
+            while (cursor->next->frequency > current->frequency) {
                 cursor = cursor->next;
             }
             // cursor->next is the first element which is <= current
@@ -219,7 +212,7 @@ bool soll_isin(soll* s, char* str, long* cnt) {
     }
 
     // Increment the frequency of the accessed element
-    current->count++;
+    current->frequency++;
 
     // Reorganize the list based on s->type
     if (s->type == mtf) {
@@ -257,7 +250,7 @@ int soll_freq(soll* s, char* str) {
     }
 
     // If the element is found, return its frequency; otherwise, return 0
-    return (current != NULL) ? current->count : ZERO;
+    return (current != NULL) ? current->frequency : ZERO;
 
 }
 
@@ -286,8 +279,9 @@ int soll_size(soll* s) {
 
 
 void soll_tostring(soll* s, char* str) {
-    if (s == NULL || str == NULL) {
-        on_error("Unable to generate string for SOLL\n");
+    if (s == NULL || str == NULL || s->head == NULL) {
+    	str[ZERO] = '\0';
+        return;
     }
 
     Node* current = s->head;
@@ -295,7 +289,7 @@ void soll_tostring(soll* s, char* str) {
 
     // Traverse the list and append each element's data and frequency to the string
     while (current != NULL) {
-        int written = snprintf(str + offset, MAX_STR_LEN - offset, "%s(%d)", current->data, current->count);
+        int written = snprintf(str + offset, MAX_STR_LEN - offset, "%s(%d)", current->data, current->frequency);
         if (written < 0 || written >= (MAX_STR_LEN - offset)) {
             // Handle potential error or buffer overflow
             return;

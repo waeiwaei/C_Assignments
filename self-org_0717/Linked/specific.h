@@ -1,13 +1,12 @@
 #pragma once
-#ifndef SPECIFIC_H
-#define SPECIFIC_H
+
 
 // Define the SOLLTYPE macro
 #define SOLLTYPE "MTF" // Replace "MTF" with the appropriate self-organizing policy used in your implementation
 
 typedef struct Node{
 	char* data;
-	int count;
+	int frequency;
 	struct Node* next;
 }Node;
 
@@ -22,4 +21,4 @@ bool frequency_reorg(soll* s, Node* current, Node* previous);
 bool transpose_reorg(soll* s, Node* current, Node* previous);
 bool mtf_reorg(soll* s, Node* current, Node* previous);
 
-#endif /* SPECIFIC_H */
+
